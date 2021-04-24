@@ -1,4 +1,5 @@
 const { response } = require('express');
+const becryptjs = require('bcryptjs');
 const User = require('../models/user');
 
 
@@ -18,6 +19,13 @@ const usersPost = async(req, res = response) => {
 
     const { name, password, email, role } = req.body;
     const user = new User({ name, password, email, role });
+
+    //verificar si el correo existe
+
+    //encruptar password
+
+    const salt = becryptjs.genSaltSync(10);
+    user.password = becryptjs.hashSync(password, salt);
 
     await user.save();
 
