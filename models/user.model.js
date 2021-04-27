@@ -31,5 +31,10 @@ const UserSchema = Schema({
         default: false
     },
 });
+//quitar de la respuesta las variables __v y password
+UserSchema.methods.toJSON = function() {
+    const { __v, password, ...user } = this.toObject();
+    return user;
+};
 
 module.exports = model('User', UserSchema);
