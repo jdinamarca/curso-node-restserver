@@ -5,15 +5,22 @@ const becryptjs = require('bcryptjs');
 const User = require('../models/user.model');
 
 
-const usersGet = (req, res = response) => {
+const usersGet = async(req, res = response) => {
 
-    const { nombre, apikey, page = 1 } = req.query;
+    const { limit = 5, from = 0 } = req.query;
+    const query = { status: true };
 
+    //Promise.all espera a que se ejecuten ambas querys,si una falla, falla todo
+    //Debe ir con await, sino, ejecutará el res.json antes
+    const [total, users] = await Promise.all([
+        User.countDocuments(query),
+        User.find(query)
+        .limit(Number(limit))
+        .skip(Number(from))
+    ]);
     res.json({
-        msg: 'get API -  Controller',
-        nombre,
-        apikey,
-        page
+        total,
+        users
     });
 };
 
@@ -34,10 +41,8 @@ const usersPost = async(req, res = response) => {
 };
 
 const usersPut = async(req, res = response) => {
-
     const { id } = req.params;
-    const { password, google, email, ...resto } = req.body;
-
+    const { _id, password, google, email, ...resto } = req.body;
     //encriptar password
     if (password) {
         const salt = becryptjs.genSaltSync(10);
@@ -46,18 +51,20 @@ const usersPut = async(req, res = response) => {
 
     const user = await User.findByIdAndUpdate(id, resto);
 
-    res.json({
-        user
-    });
+    res.json(user);
 };
 
-const usersDelete = (req, res) => {
+const usersDelete = async(req, res = response) => {
 
-    const id = req.params.id;
-    res.json({
-        msg: 'delete API - Controller',
-        id
-    });
+    const { id } = req.params;
+    //eliminar usuario de verdad de la BD
+    //const user = await User.findByIdAndDelete(id);
+
+    //esto permitirá que de cara al usuario aparezca como que el usuario fue eliminado
+    //pero en realidad no se ha eliminado, así se evitan problemas de integridad
+    //referencial.
+    const user = await User.findByIdAndUpdate(id, { status: false });
+    res.json(user);
 };
 
 module.exports = {
