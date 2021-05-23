@@ -33,7 +33,8 @@ const UserSchema = Schema({
 });
 //quitar de la respuesta las variables __v y password
 UserSchema.methods.toJSON = function() {
-    const { __v, password, ...user } = this.toObject();
+    const { __v, password, _id, ...user } = this.toObject();
+    user.uid = _id;
     return user;
 };
 

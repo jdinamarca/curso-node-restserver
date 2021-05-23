@@ -10,7 +10,7 @@ const usersGet = async(req, res = response) => {
     const { limit = 5, from = 0 } = req.query;
     const query = { status: true };
 
-    //Promise.all espera a que se ejecuten ambas querys,si una falla, falla todo
+    //Promise.all espera a que se ejecuten ambas queries,si una falla, falla todo
     //Debe ir con await, sino, ejecutará el res.json antes
     const [total, users] = await Promise.all([
         User.countDocuments(query),
@@ -43,7 +43,7 @@ const usersPost = async(req, res = response) => {
 const usersPut = async(req, res = response) => {
     const { id } = req.params;
     const { _id, password, google, email, ...resto } = req.body;
-    //encriptar password
+    //encrypt password
     if (password) {
         const salt = becryptjs.genSaltSync(10);
         resto.password = becryptjs.hashSync(password, salt);
@@ -57,8 +57,8 @@ const usersPut = async(req, res = response) => {
 const usersDelete = async(req, res = response) => {
 
     const { id } = req.params;
-    //eliminar usuario de verdad de la BD
-    //const user = await User.findByIdAndDelete(id);
+
+    const uid = req.uid;
 
     //esto permitirá que de cara al usuario aparezca como que el usuario fue eliminado
     //pero en realidad no se ha eliminado, así se evitan problemas de integridad
